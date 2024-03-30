@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const { pool } = require('./dbConfig.js')
 const bcrypt = require('bcryptjs')
+const session = require('express-session')
 
 require('dotenv').config()
 
@@ -9,6 +10,14 @@ const PORT = process.env.PORT || 4000
 
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
+
+app.use(
+  session({
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+)
 
 app.get('/', (req, res) => {
   res.render('index')
@@ -40,7 +49,7 @@ app.post('/users/register', async (req, res) => {
 
   if (password.length < 6) {
     errors.push({ message: 'Password should be at least 6 characters' })
-    return window.alert('password must be at least 6 characters long')
+    return console.log('password must be at least 6 characters long')
   }
 
   if (password !== password2) {
@@ -56,7 +65,20 @@ app.post('/users/register', async (req, res) => {
     [email],
     (err, results) => {
       if (err) throw err
-      console.log(results.rows)
+
+      if (results.rows.length > 0) {
+        errors.push({ message: 'Email already registered' })
+        return console.log('User with this email already exists')
+      }
+      pool.query(
+        `INSERT INTO users (name, email, password) values ($1, $2, $3) returning id, password`,
+        [name, email, hashedPassword],
+        (err, results) => {
+          if (err) throw err
+          console.log(results.rows)
+          res.redirect('/users/login')
+        }
+      )
     }
   )
 })
