@@ -3,6 +3,11 @@ const app = express()
 const { pool } = require('./dbConfig.js')
 const bcrypt = require('bcryptjs')
 const session = require('express-session')
+const passport = require('passport')
+
+const initializePassport = require('./passportConfig.js')
+
+initializePassport(passport)
 
 require('dotenv').config()
 
@@ -10,7 +15,6 @@ const PORT = process.env.PORT || 4000
 
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
-
 app.use(
   session({
     secret: 'secret',
@@ -18,6 +22,8 @@ app.use(
     saveUninitialized: false,
   })
 )
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.get('/', (req, res) => {
   res.render('index')
@@ -82,6 +88,14 @@ app.post('/users/register', async (req, res) => {
     }
   )
 })
+
+app.post(
+  '/users/login',
+  passport.authenticate('local', {
+    successRedirect: '/users/dashboard',
+    failureRedirect: '/users/login',
+  })
+)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
