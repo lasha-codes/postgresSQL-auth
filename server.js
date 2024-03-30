@@ -1,5 +1,7 @@
 const express = require('express')
 const app = express()
+const { pool } = require('./dbConfig.js')
+
 require('dotenv').config()
 
 const PORT = process.env.PORT || 4000

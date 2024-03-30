@@ -5,3 +5,5 @@ CREATE TABLE users (
   password VARCHAR(200) NOT NULL,
   UNIQUE(email)
 );
+
+INSERT INTO users(name, email, password) values ('David Johnson', 'david@gmail.com', 'password') returning *;
