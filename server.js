@@ -19,7 +19,7 @@ app.get('/users/login', (req, res) => {
 })
 
 app.get('/users/dashboard', (req, res) => {
-  res.render('dashboard')
+  res.render('dashboard', { user: 'Lasha' })
 })
 
 app.listen(PORT, () => {
